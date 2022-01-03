@@ -112,6 +112,7 @@ def FriedmanMSE(left_values, right_values):
 
 
 def construct_decision_tree(dataset, remainedSet, targets, depth, lf, leaf_nodes, max_depth, loss, criterion='MSE', split_points=0):
+    print(targets)
     if depth < max_depth:
         # todo 通过修改这里可以实现选择多少特征训练
         attributes = dataset.get_attributes()  ####

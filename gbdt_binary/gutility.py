@@ -15,6 +15,7 @@ from math import exp, log
 
 from sklearn.metrics import accuracy_score
 
+
 def convertModel(list):
     length = len(list)
     pre_md_weight = np.array([1 / length] * length)
@@ -68,6 +69,7 @@ def residual_cal(y_t, y_p, weight, K):
 
     return data_weight, model_weight
 
+
 def test_acccuracy(self, trees, dataset):
     pre = []
     for index in range(1, dataset.dsize):
@@ -84,6 +86,7 @@ def test_acccuracy(self, trees, dataset):
     accuracy = accuracy_score(pre, dataset.label)
     print(accuracy)
     return accuracy
+
 
 class VotingClassifier(object):
     """ Implements a voting classifier for pre-trained classifiers"""
@@ -117,7 +120,6 @@ class VotingClassifier(object):
                 res += pre * self.weights[i]
             res = np.argmax(res, axis=1)
         return res
-
 
     def reduce(self, n):
         a = [124, 346, 576, 3, 5, 76, 823, 45765, 863, 5236, 586, 89352, 123]
@@ -188,6 +190,7 @@ class BinomialDeviance(ClassificationLossFunction):
 
     def update_tf_value(self, iter, temp_f, tree, leaf_nodes, subset, dataset,
                         learn_rate, label=None):
+        print("tree:", tree)
         data_idset = set(dataset.get_instances_idset())
         # print(data_idset)
         subset = set(subset)
@@ -196,7 +199,7 @@ class BinomialDeviance(ClassificationLossFunction):
         # print(type(temp_f))
         for node in leaf_nodes:
             # print(type(temp_f))
-            
+
             for id in node.get_idset():
                 # print(id)
                 # print(temp_f[id])
@@ -205,17 +208,18 @@ class BinomialDeviance(ClassificationLossFunction):
                 # print(iter)
                 if id in temp_f.keys() is True:
                     tf = temp_f[id]
-                    temp_f[id] = (tf*iter + float(learn_rate) * float(node.get_predict_value()))/(iter+1)
+                    temp_f[id] = (tf * iter + float(learn_rate) * float(node.get_predict_value())) / (iter + 1)
         for id in data_idset - subset:
-            temp_f[id] = (temp_f[id]*iter +
-                          learn_rate * tree.get_predict_value(dataset.get_instance(id)))/(iter+1)
+            temp_f[id] = (temp_f[id] * iter +
+                          learn_rate * tree.get_predict_value(dataset.get_instance(id))) / (iter + 1)
+        print("temp_f:", temp_f)
         return temp_f
 
     def update_fset_value(self, temp_f, treelfs, subset, dataset, learn_rate, label=None):
         ids = dataset.get_instances_idset()
         # temp_f = dict()
         # for id in ids:
-            # temp_f[id] = 0.0
+        # temp_f[id] = 0.0
         index = 0
         # print("temp_f: " + str(temp_f))
         # print("f: " + str(f))
@@ -228,12 +232,11 @@ class BinomialDeviance(ClassificationLossFunction):
                              subset, dataset, learn_rate, label=None)
         return temp_f
 
-
     def initialize(self, f, dataset):
         ids = dataset.get_instances_idset()
         # subset = set()
         # for i in range(1, 50):
-            # subset.add(i)
+        # subset.add(i)
         # ids = subset
         for id in ids:
             f[id] = 0.0
@@ -249,6 +252,7 @@ class BinomialDeviance(ClassificationLossFunction):
 
 class MultinomialDeviance(ClassificationLossFunction):
     """多元分类的损失函数"""
+
     def __init__(self, n_classes, labelset):
         self.labelset = set([label for label in labelset])
         if n_classes < 3:
@@ -271,11 +275,11 @@ class MultinomialDeviance(ClassificationLossFunction):
             p_sum = sum([exp(f[id][x]) for x in label_valueset])
             # 对于同一样本在不同类别的残差，需要在同一次迭代中更新在不同类别的残差
             for label in label_valueset:
-                p = exp(f[id][label])/p_sum
+                p = exp(f[id][label]) / p_sum
                 y = 0.0
                 if dataset.get_instance(id)["label"] == label:
                     y = 1.0
-                residual[id][label] = y-p
+                residual[id][label] = y - p
         return residual
 
     def update_tf_value(self, iter, temp_f, tree, leaf_nodes, subset, dataset, learn_rate, label=None):
@@ -308,7 +312,7 @@ class MultinomialDeviance(ClassificationLossFunction):
             lf = treelf_current.get_lf()
             leaf_nodes = []
             self.update_tf_value(index, temp_f, tree, leaf_nodes,
-                             subset, dataset, learn_rate, label=None)
+                                 subset, dataset, learn_rate, label=None)
         return temp_f
 
     def initialize(self, f, dataset):
@@ -325,8 +329,8 @@ class MultinomialDeviance(ClassificationLossFunction):
         sum1 = sum([targets[id] for id in idset])
         if sum1 == 0:
             return sum1
-        sum2 = sum([abs(targets[id])*(1-abs(targets[id])) for id in idset])
-        return ((self.K-1)/self.K)*(sum1/sum2)
+        sum2 = sum([abs(targets[id]) * (1 - abs(targets[id])) for id in idset])
+        return ((self.K - 1) / self.K) * (sum1 / sum2)
 
 
 class packed_treelfs:
@@ -345,4 +349,3 @@ class packed_treelfs:
 
     def get_size(self):
         return gen_atta_size(self.trees)
-

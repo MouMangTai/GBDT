@@ -106,6 +106,7 @@ class BinomialDeviance(ClassificationLossFunction):
         # print(subset)
         for node in leaf_nodes:
             for id in node.get_idset():
+                print(id, " ", node.get_predict_value())
                 f[id] += learn_rate*node.get_predict_value()
         for id in data_idset-subset:
             f[id] += learn_rate*tree.get_predict_value(dataset.get_instance(id))
@@ -213,7 +214,6 @@ class GBDT:
                     print("更新后的f：", f)
                 train_loss = self.compute_loss(dataset, train_data, f)
                 print("iter%d : average train_loss=%f" % (iter, train_loss))
-
         else:
             if self.loss_type == 'binary-classification':
                 self.loss = BinomialDeviance(n_classes=dataset.get_label_size())
@@ -221,6 +221,7 @@ class GBDT:
                 self.loss = LeastSquaresError(n_classes=1)
 
             f = dict()  # 记录F_{m-1}的值
+            print("还没初始化前的f", f)
             self.loss.initialize(f, dataset)
             print("初始化后的f：", f)
             for iter in range(1, self.max_iter+1):
@@ -229,14 +230,13 @@ class GBDT:
                     subset = sample(subset, int(len(subset)*self.sample_rate))
                 # 用损失函数的负梯度作为回归问题提升树的残差近似值
                 residual = self.loss.compute_residual(dataset, subset, f)
-                print("residual", residual)
+                print("第", iter, "次residual", residual)
 
                 leaf_nodes = []
                 targets = residual
                 tree = construct_decision_tree(dataset, subset, targets, 0, leaf_nodes, self.max_depth, self.loss, self.split_points)
                 self.trees[iter] = tree
                 self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
-
                 print("更新后的f：", f)
 
                 if isinstance(self.loss, RegressionLossFunction):

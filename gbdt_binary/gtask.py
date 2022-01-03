@@ -17,6 +17,8 @@ from tree import construct_decision_tree, leafnodes
 from gutility import BinomialDeviance
 
 import copy, random
+
+
 class Task:
 
     def __init__(self, task_id, node_id, tree, max_iter, sample_rate, learn_rate,
@@ -35,56 +37,95 @@ class Task:
         self.split_points = split_points  # gbdt
         self.loss = None  # gbdt
 
-
-    def gtask_ie1_je1(self, dataset, f, loss): # 第一轮第一项
-        f = dict()
-        self.loss = loss
+    def gtask_ie1_je1(self, dataset, f, loss, node_local, cur_node):  # 第一轮第一项
         train_data = dataset.get_instances_idset()
-        # print(train_data)
+        nodes = node_local.node_dict.values()
+        # sub为idset
         subset = train_data
-        # if 0 < self.sample_rate < 1:
-            # subset = sample(subset, int(len(subset) * self.sample_rate))
-            # subset = sample(subset, 50)
-            # print(subset)
-        # subset = set()
-        # for i in range(1, 50):
-            # subset.add(i)
-        # print(subset)
-        # 用损失函数的负梯度作为回归问题提升树的残差近似值
-        self.loss.initialize(f, dataset)
+
+        G = dict()
+        H = dict()
+        M = len(nodes)
+
+        # 遍历所有的数据集
+        for node in nodes:
+            # 跳过当前node
+            if cur_node.id == node.id:
+                continue
+            # 初始化f和g
+            g = dict()
+            h = dict()
+
+            # 用损失函数的负梯度作为回归问题提升树的残差近似值
+            self.loss = loss
+            for i in range(1, len(node.origin_dataset)):
+                g[i] = 0.0
+                h[i] = 0.0
+
+            # Update the gradients of instances in I
+
+            for x in range(1, len(node.origin_dataset)):
+                # 对应算法2中的Get the similar instance ID s
+                ids = getSimilar()
+                for id in ids:
+                    # 对应算法2中的g和h的计算
+                    g[id] += g
+                    h[id] += h
+                print(x)
+
+            G[node.id] = g
+            H[node.id] = h
+        print("G:", G)
+        print("H:", H)
+
+        # Update the gradients of instances in I
+
+        # finallyG finallyH
+        fg = dict()
+        fh = dict()
+
+        for x in range(1, len(cur_node.origin_dataset)):
+            fg[x] = 0
+            fh[x] = 0
+
+            for i in range(1, M):
+                if i == node.id:
+                    fg[x] += computeg(x)
+                    fh[x] += computeh(x)
+                else:
+                    fg[x] += G[i][x]
+                    fh[x] += H[i][x]
+
+
+
         residual = self.loss.compute_residual(dataset, subset, f)
-        # print(residual)
+        print(residual)
         leaf_nodes = []
         lf = leafnodes()
         targets = residual
         tree, lf = construct_decision_tree(dataset, subset, targets, 0, lf, leaf_nodes,
-                                       self.max_depth, self.loss, self.split_points)
+                                           self.max_depth, self.loss, self.split_points)
         self.tree = tree
         tup = TreeLf(tree, lf)
-        # treelfs.append(tup)
-        # f = self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
+
         # print(f)
         print('fit complish!')
-        #print(tup)
+        # print(tup)
         return tup
 
-    def gtask_il1_je1(self, Pre_treelfs, dataset, f, loss): #第一轮非第一项
+    def gtask_il1_je1(self, Pre_treelfs, dataset, f, loss, node_local):  # 第一轮非第一项
         self.loss = loss
-        # f = dict()
+        f = dict()
+        g = dict()
         train_data = dataset.get_instances_idset()
         subset = train_data
-        
-       
+
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
-        self.loss.initialize(f, dataset)
+        self.loss.initialize(f, g, dataset)
         if 0 < self.sample_rate < 1:
             subset = sample(subset, int(len(subset) * self.sample_rate))
-            # subset = sample(subset, 50)
-        # subset = set()
-        # for i in range(1, 50):
-            # subset.add(i)
 
-        # print(Pre_treelfs[0])  # 是tuple的列表对象
+        # 遍历所有的数据集
 
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         self.loss.update_fset_value(f, Pre_treelfs, subset, dataset, self.learn_rate, label=None)
@@ -94,15 +135,13 @@ class Task:
         targets = residual
         lf = leafnodes()
         tree, lf = construct_decision_tree(dataset, subset, targets, 0, lf, leaf_nodes,
-                                       self.max_depth, self.loss, self.split_points)
+                                           self.max_depth, self.loss, self.split_points)
         self.tree = tree
         tup = TreeLf(tree, lf)
 
         # Pre_treelfs.append(tup)
         # f = self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
+        print(f)
         print('fit complish!')
         # print(tup)  # 无法打印
         return tup
-
-  
-

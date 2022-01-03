@@ -44,19 +44,19 @@ head_dataset = pd.read_csv(head_url)
 head_dataset = np.array(head_dataset)
 for i in range(1, 100):
     node_id = i
-    
+
     train_url = "../data_preprocessing/adult/adult_slices/train_" + str(node_id) + ".csv"
     valid_url = "../data_preprocessing/adult/adult_slices/test_" + str(node_id) + ".csv"
     train_dataset = pd.read_csv(train_url)
     valid_dataset = pd.read_csv(valid_url)
     train_dataset = np.array(train_dataset)
     valid_dataset = np.array(valid_dataset)
-    
+
     # print(train_dataset.shape)
-    fed_t = IN_DataSet(2, train_dataset,head_dataset) 
+    fed_t = IN_DataSet(2, train_dataset, head_dataset)
     # 第一个参数表示读取data instance从第几列开始（因为有重复项），第二个参数是读取的数据集
-    #第三个参数是读取特征名称
-    fed_v = IN_DataSet(1, valid_dataset,head_dataset)
+    # 第三个参数是读取特征名称
+    fed_v = IN_DataSet(1, valid_dataset, head_dataset)
     # print(fed_t.dsize)
     node = Node(node_id=node_id, threshold=0.9)
     node.set_data(fed_t, fed_v)
@@ -65,7 +65,7 @@ for i in range(1, 100):
     static_list.append(node)
     node_local.id_set.append(i)
     node_local.node_dict[i] = node
-    
+
 # for i in node_list:
 #     print("label:", i.fed_train.label)
 #     print("instance:", i.fed_train.instances)
@@ -89,7 +89,6 @@ for j in range(1, node_local.tao + 1):
     if j == 1:
         f, node_list = modified_local_je1(node_list, node_local, max_iter,
                     sample_rate, learn_rate, max_depth, node_local.loss, num_choice)
-        print("f2:",f)
     else:
         node_list = modified_local_jl1(node_list, node_local, max_iter,
                     sample_rate, learn_rate, max_depth, f, node_local.loss, num_choice)

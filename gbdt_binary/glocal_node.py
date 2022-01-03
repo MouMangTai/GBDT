@@ -10,14 +10,12 @@ import operator
 import numpy as np
 import sys
 
-
 import random
 import copy, random
 import numpy as np
 
-
-
 from sklearn.metrics import accuracy_score
+
 
 class Local_Node:
 
@@ -48,7 +46,7 @@ class Local_Node:
         self.size = 0
         self.trace_num = np.array([])
         self.trace_size = np.array([])
-        
+
     def choice_set(self, num_choice):
         # for single
         nc = random.sample(self.id_set, num_choice)
@@ -59,7 +57,7 @@ class Local_Node:
             node_idx = self.node_dict[idx]
             new_list.append(node_idx)
         return new_list
-            
+
     def boosting_node(self):
         self.M = packed_treelfs(self.treelfs, self.trees)
         return self.M
@@ -72,7 +70,7 @@ class Local_Node:
     def wrap_boosting(self):
         # print(len(self.cur_treelfs))
         self.M_for_center = packed_treelfs(
-            self.cur_treelfs, self.cur_trees) # true
+            self.cur_treelfs, self.cur_trees)  # true
         return self.M_for_center
 
     def concatenate_model_local(self, tree, treelf):
@@ -93,7 +91,6 @@ class Local_Node:
         self.M = None
         return self.trees, self.treelfs
 
-
     def concatenate_interaction_model(self, tree, treelf):
         print('!!!!!!!Concat', self.treelfs.shape)
         self.cur_trees.append(tree)
@@ -110,7 +107,6 @@ class Local_Node:
     def initialize_gbdt(self, dataset):  # 第一个节点的dataset，从外部给出
 
         self.loss = BinomialDeviance(n_classes=2)
-
 
         f = dict()  # 记录F_{m-1}的值
         self.loss.initialize(f, dataset)

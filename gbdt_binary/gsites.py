@@ -61,6 +61,7 @@ def modified_local_je1(node_list, node_local, max_iter,
             node_local.concatenate_model_local(tup.get_tree(), tup) # true
             
     node_local.wrap_boosting()
+    print("f1:",f)
     return f, node_list
 
 
@@ -69,7 +70,7 @@ def modified_local_jl1(node_list, node_local, max_iter,
     if num_choice == 0:
         return 
     new_list = node_local.choice_set(num_choice)
-    f = dict()
+    # f = dict()
     for node_index, node in enumerate(new_list):
         # temp_M = node_concate(node, node_local.M_for_center, class_num, node_local)
         MM = node.temp_concatenate(node_local.M_for_center)

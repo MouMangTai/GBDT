@@ -175,6 +175,7 @@ class BinomialDeviance(ClassificationLossFunction):
             # print(idd)
             # y_i = dataset.get_instance(idd)['label']
             y_i = dataset.get_instance(id)['label']
+            # print("y_i:", y_i)
             # print(y_i)
             try:
                 y_i = int(y_i)
@@ -182,6 +183,7 @@ class BinomialDeviance(ClassificationLossFunction):
             except OverflowError:
                 ans = float('inf')
             residual[id] = 2.0 * y_i / (1 + ans)
+            # print("residual:", residual)
         return residual
 
     def update_tf_value(self, iter, temp_f, tree, leaf_nodes, subset, dataset,

@@ -37,7 +37,7 @@ class Task:
 
 
     def gtask_ie1_je1(self, dataset, f, loss): # 第一轮第一项
-        # f = dict()
+        f = dict()
         self.loss = loss
         train_data = dataset.get_instances_idset()
         # print(train_data)
@@ -53,7 +53,7 @@ class Task:
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         self.loss.initialize(f, dataset)
         residual = self.loss.compute_residual(dataset, subset, f)
-        print(residual)
+        # print(residual)
         leaf_nodes = []
         lf = leafnodes()
         targets = residual
@@ -63,7 +63,7 @@ class Task:
         tup = TreeLf(tree, lf)
         # treelfs.append(tup)
         # f = self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
-        print(f)
+        # print(f)
         print('fit complish!')
         #print(tup)
         return tup
@@ -76,7 +76,7 @@ class Task:
         
        
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
-        # self.loss.initialize(f, dataset)
+        self.loss.initialize(f, dataset)
         if 0 < self.sample_rate < 1:
             subset = sample(subset, int(len(subset) * self.sample_rate))
             # subset = sample(subset, 50)
@@ -89,7 +89,7 @@ class Task:
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         self.loss.update_fset_value(f, Pre_treelfs, subset, dataset, self.learn_rate, label=None)
         residual = self.loss.compute_residual(dataset, subset, f)  ####
-        print("residual:", residual)
+        # print("residual:", residual)
         leaf_nodes = []
         targets = residual
         lf = leafnodes()

@@ -37,7 +37,7 @@ node_local = Local_Node(node_id=2, T=T, tao=30, n=100)
 static_list = []
 start_index = 0
 records = []
-num_choice = 5
+num_choice = 15
 ind = 0
 head_url = './data/adult_1.csv'
 head_dataset = pd.read_csv(head_url)
@@ -66,9 +66,9 @@ for i in range(1, 100):
     node_local.id_set.append(i)
     node_local.node_dict[i] = node
     
-for i in node_list:
-    print("label:", i.fed_train.label)
-    print("instance:", i.fed_train.instances)
+# for i in node_list:
+#     print("label:", i.fed_train.label)
+#     print("instance:", i.fed_train.instances)
 
 
 T = 2  # 用不到

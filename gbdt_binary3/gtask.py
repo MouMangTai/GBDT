@@ -54,11 +54,17 @@ class Task:
         self.loss.initialize(f, dataset)
 
         # f = self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
-        residual = self.loss.compute_residual(dataset, subset, f)
+        # residual = self.loss.compute_residual(dataset, subset, f)
+
+        residual = {}
 
         G, H = self.loss.computeGH(nodes, train_node, f, None, subset, dataset, self.learn_rate)
-        print("G:", G)
-        print("H:", H)
+        for temp in G:
+            if H[temp] == 0.0:
+                continue
+            residual[temp] = (-G[temp])/H[temp]
+
+        print("residual:", residual)
 
 
         leaf_nodes = []
@@ -94,13 +100,18 @@ class Task:
         f = self.loss.update_fset_value(f, Pre_treelfs, subset, dataset, self.learn_rate, label=None)
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         # print(f)
-        residual = self.loss.compute_residual(dataset, subset, f)  ####
-
+        # residual = self.loss.compute_residual(dataset, subset, f)  ####
+        residual = {}
         # 新增
 
         G, H = self.loss.computeGH(nodes, train_node, f, Pre_treelfs, subset, dataset, self.learn_rate)
-        print("G:", G)
-        print("H:", H)
+
+        for temp in G:
+            if H[temp] == 0.0:
+                continue
+            residual[temp] = (-G[temp])/H[temp]
+
+        print("residual:", residual)
 
         leaf_nodes = []
         targets = residual

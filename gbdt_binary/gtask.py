@@ -149,8 +149,8 @@ class Task:
         h = self.loss.compute_h(cur_node.fed_train, f)
 
         # finallyG finallyH
-        fG = dict()
-        fH = dict()
+        fG = {}
+        fH = {}
 
         for x in range(len(cur_node.origin_dataset)):
             fG[x] = 0

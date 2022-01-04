@@ -40,63 +40,68 @@ class Task:
     def gtask_ie1_je1(self, dataset, f, loss, node_local, cur_node):  # 第一轮第一项
         train_data = dataset.get_instances_idset()
         nodes = node_local.node_dict.values()
-        # sub为idset
         subset = train_data
-
-        G = dict()
-        H = dict()
+        # 用损失函数的负梯度作为回归问题提升树的残差近似值
+        self.loss = loss
+        f = dict()
+        Gset = dict()
+        Hset = dict()
         M = len(nodes)
-
+        self.loss.initialize(f, dataset)
         # 遍历所有的数据集
         for node in nodes:
             # 跳过当前node
             if cur_node.id == node.id:
                 continue
             # 初始化f和g
-            g = dict()
-            h = dict()
+            G = []
+            H = []
+            # Update the gradients of instances in I,更新g和h
+            g = self.loss.compute_g(node.fed_train, f)
+            h = self.loss.compute_h(node.fed_train, f)
 
-            # 用损失函数的负梯度作为回归问题提升树的残差近似值
-            self.loss = loss
-            for i in range(1, len(node.origin_dataset)):
-                g[i] = 0.0
-                h[i] = 0.0
+            print("g:", g)
+            print("h:", h)
+            print("G:", G)
+            print("H:", H)
 
-            # Update the gradients of instances in I
-
-            for x in range(1, len(node.origin_dataset)):
+            for xq in range(len(node.origin_dataset)):
                 # 对应算法2中的Get the similar instance ID s
-                ids = getSimilar()
+                ids = [1, 2, 3, 4, 5, 6, 7, 10]
+
                 for id in ids:
                     # 对应算法2中的g和h的计算
-                    g[id] += g
-                    h[id] += h
-                print(x)
+                    G[node.id][id] += g[xq]
+                    H[node.id][id] += h[xq]
+                # print(x)
 
-            G[node.id] = g
-            H[node.id] = h
-        print("G:", G)
-        print("H:", H)
+            Gset[node.id] = G
+            Hset[node.id] = H
+        print("Gset:", Gset)
+        print("Hset:", Hset)
 
         # Update the gradients of instances in I
+        g = self.loss.compute_g(cur_node.fed_train, f)
+        h = self.loss.compute_h(cur_node.fed_train, f)
 
         # finallyG finallyH
-        fg = dict()
-        fh = dict()
+        fG = dict()
+        fH = dict()
 
-        for x in range(1, len(cur_node.origin_dataset)):
-            fg[x] = 0
-            fh[x] = 0
+        for x in range(len(cur_node.origin_dataset)):
+            fG[x] = 0
+            fH[x] = 0
 
-            for i in range(1, M):
+            for i in range(M):
                 if i == node.id:
-                    fg[x] += computeg(x)
-                    fh[x] += computeh(x)
+                    fG[x] += g[x]
+                    fH[x] += h[x]
                 else:
-                    fg[x] += G[i][x]
-                    fh[x] += H[i][x]
+                    fG[x] += Gset[i][x]
+                    fH[x] += Hset[i][x]
 
-
+        print("fG:", fG)
+        print("fH:", fH)
 
         residual = self.loss.compute_residual(dataset, subset, f)
         print(residual)

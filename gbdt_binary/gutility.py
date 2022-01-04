@@ -188,6 +188,37 @@ class BinomialDeviance(ClassificationLossFunction):
             # print("residual:", residual)
         return residual
 
+    # 更新g的值
+    def compute_g(self, dataset, f):
+        g = {}
+
+        for id in dataset.get_instances_idset():
+            y_i = dataset.get_instance(id)['label']
+            try:
+                y_i = int(y_i)
+                ans = exp(2 * y_i * f[id])
+            except OverflowError:
+                ans = float('inf')
+            g[id] = 2.0 * y_i / (1 + ans)
+        return g
+
+    # 更新h的值
+    def compute_h(self, dataset, f):
+        h = {}
+
+        for id in dataset.get_instances_idset():
+            y_i = dataset.get_instance(id)['label']
+            try:
+                y_i = int(y_i)
+                ans1 = (4 * (y_i) * (y_i) * exp((-2) * y_i * f[id])) / (log(2) * (exp((-2) * y_i * f[id])) + 1)
+                ans2 = (4 * (y_i) * (y_i) * exp((-4) * y_i * f[id])) / (
+                            log(2) * (exp((-2) * y_i * f[id]) + 1) * (exp((-2) * y_i * f[id]) + 1))
+            except OverflowError:
+                ans1 = float('inf')
+                ans2 = float('inf')
+            h[id] = ans1 - ans2
+        return h
+
     def update_tf_value(self, iter, temp_f, tree, leaf_nodes, subset, dataset,
                         learn_rate, label=None):
         print("tree:", tree)

@@ -87,7 +87,7 @@ def modified_local_jl1(node_list, node_local, max_iter,
             indices = np.random.permutation(len(node.origin_dataset))
             # node.origin_dataset = node.origin_dataset[indices]
             # node.fed_train = IN_DataSet(node.origin_dataset)
-            tup = task.gtask_il1_je1(node_local.cur_treelfs, node.fed_train, f, loss, node_local)
+            tup = task.gtask_il1_je1(node_local.cur_treelfs, node.fed_train, f, loss, node_local, node)
 
             node_local.concatenate_interaction_model(tup.get_tree(), tup)
             node_local.concatenate_model_local(tup.get_tree(), tup)

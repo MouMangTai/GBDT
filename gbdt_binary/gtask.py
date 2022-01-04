@@ -39,46 +39,35 @@ class Task:
 
     def gtask_ie1_je1(self, dataset, f, loss, node_local, cur_node):  # 第一轮第一项
         train_data = dataset.get_instances_idset()
-        nodes = node_local.node_dict.values()
+        f = dict()
         subset = train_data
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         self.loss = loss
-        f = dict()
-        Gset = dict()
-        Hset = dict()
-        M = len(nodes)
         self.loss.initialize(f, dataset)
+
+        # 算法2开始
+        nodes = node_local.node_dict.values()
+        M = len(nodes)
+
+        G = [[0.0 for i in range(len(cur_node.origin_dataset) + 1)] for i in range(len(nodes) + 1)]
+        H = [[0.0 for i in range(len(cur_node.origin_dataset) + 1)] for i in range(len(nodes) + 1)]
+
         # 遍历所有的数据集
         for node in nodes:
             # 跳过当前node
             if cur_node.id == node.id:
                 continue
-            # 初始化f和g
-            G = []
-            H = []
             # Update the gradients of instances in I,更新g和h
             g = self.loss.compute_g(node.fed_train, f)
             h = self.loss.compute_h(node.fed_train, f)
 
-            print("g:", g)
-            print("h:", h)
-            print("G:", G)
-            print("H:", H)
-
-            for xq in range(len(node.origin_dataset)):
+            for xq in node.fed_train.get_instances_idset():
                 # 对应算法2中的Get the similar instance ID s
-                ids = [1, 2, 3, 4, 5, 6, 7, 10]
-
+                ids = [2, 3, 4, 5, 6, 7, 10]
                 for id in ids:
                     # 对应算法2中的g和h的计算
                     G[node.id][id] += g[xq]
                     H[node.id][id] += h[xq]
-                # print(x)
-
-            Gset[node.id] = G
-            Hset[node.id] = H
-        print("Gset:", Gset)
-        print("Hset:", Hset)
 
         # Update the gradients of instances in I
         g = self.loss.compute_g(cur_node.fed_train, f)
@@ -97,11 +86,13 @@ class Task:
                     fG[x] += g[x]
                     fH[x] += h[x]
                 else:
-                    fG[x] += Gset[i][x]
-                    fH[x] += Hset[i][x]
+                    fG[x] += G[i][x]
+                    fH[x] += G[i][x]
 
         print("fG:", fG)
         print("fH:", fH)
+
+        # 算法二结束
 
         residual = self.loss.compute_residual(dataset, subset, f)
         print(residual)
@@ -118,19 +109,65 @@ class Task:
         # print(tup)
         return tup
 
-    def gtask_il1_je1(self, Pre_treelfs, dataset, f, loss, node_local):  # 第一轮非第一项
+    def gtask_il1_je1(self, Pre_treelfs, dataset, f, loss, node_local, cur_node):  # 第一轮非第一项
         self.loss = loss
         f = dict()
-        g = dict()
         train_data = dataset.get_instances_idset()
         subset = train_data
 
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
-        self.loss.initialize(f, g, dataset)
+        self.loss.initialize(f, dataset)
         if 0 < self.sample_rate < 1:
             subset = sample(subset, int(len(subset) * self.sample_rate))
 
+        # 算法2开始
+        nodes = node_local.node_dict.values()
+        M = len(nodes)
+
+        G = [[0.0 for i in range(len(cur_node.origin_dataset) + 1)] for i in range(len(nodes) + 1)]
+        H = [[0.0 for i in range(len(cur_node.origin_dataset) + 1)] for i in range(len(nodes) + 1)]
+
         # 遍历所有的数据集
+        for node in nodes:
+            # 跳过当前node
+            if cur_node.id == node.id:
+                continue
+            # Update the gradients of instances in I,更新g和h
+            g = self.loss.compute_g(node.fed_train, f)
+            h = self.loss.compute_h(node.fed_train, f)
+
+            for xq in node.fed_train.get_instances_idset():
+                # 对应算法2中的Get the similar instance ID s
+                ids = [2, 3, 4, 5, 6, 7, 10]
+                for id in ids:
+                    # 对应算法2中的g和h的计算
+                    G[node.id][id] += g[xq]
+                    H[node.id][id] += h[xq]
+
+        # Update the gradients of instances in I
+        g = self.loss.compute_g(cur_node.fed_train, f)
+        h = self.loss.compute_h(cur_node.fed_train, f)
+
+        # finallyG finallyH
+        fG = dict()
+        fH = dict()
+
+        for x in range(len(cur_node.origin_dataset)):
+            fG[x] = 0
+            fH[x] = 0
+
+            for i in range(M):
+                if i == node.id:
+                    fG[x] += g[x]
+                    fH[x] += h[x]
+                else:
+                    fG[x] += G[i][x]
+                    fH[x] += G[i][x]
+
+        print("fG:", fG)
+        print("fH:", fH)
+
+        # 算法二结束
 
         # 用损失函数的负梯度作为回归问题提升树的残差近似值
         self.loss.update_fset_value(f, Pre_treelfs, subset, dataset, self.learn_rate, label=None)
@@ -146,7 +183,6 @@ class Task:
 
         # Pre_treelfs.append(tup)
         # f = self.loss.update_f_value(f, tree, leaf_nodes, subset, dataset, self.learn_rate)
-        print(f)
         print('fit complish!')
         # print(tup)  # 无法打印
         return tup

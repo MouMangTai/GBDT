@@ -221,7 +221,6 @@ class BinomialDeviance(ClassificationLossFunction):
 
     def update_tf_value(self, iter, temp_f, tree, leaf_nodes, subset, dataset,
                         learn_rate, label=None):
-        print("tree:", tree)
         data_idset = set(dataset.get_instances_idset())
         # print(data_idset)
         subset = set(subset)
@@ -243,7 +242,6 @@ class BinomialDeviance(ClassificationLossFunction):
         for id in data_idset - subset:
             temp_f[id] = (temp_f[id] * iter +
                           learn_rate * tree.get_predict_value(dataset.get_instance(id))) / (iter + 1)
-        print("temp_f:", temp_f)
         return temp_f
 
     def update_fset_value(self, temp_f, treelfs, subset, dataset, learn_rate, label=None):

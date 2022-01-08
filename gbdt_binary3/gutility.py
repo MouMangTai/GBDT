@@ -226,8 +226,8 @@ class BinomialDeviance(ClassificationLossFunction):
             h = self.compute_h(cur_dataset, cur_subset, f)
 
             for xq in node.fed_train.get_instances_idset():
-                # 对应算法2中的Get the similar instance ID s
-                ids = [random.randint(1, 298) for i in range(298)]
+                # 对应算法2中的Get the similar instance ID s,未实现
+                ids = [random.randint(1,298) for i in range(98)]
                 for id in ids:
                     # 对应算法2中的g和h的计算
                     G[node.id][id] += residual[xq]

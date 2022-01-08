@@ -120,12 +120,12 @@ def construct_decision_tree(dataset, remainedSet, targets, depth, lf, leaf_nodes
         conditionValue = None
         selectedLeftIdSet = []
         selectedRightIdSet = []
-        # print(attributes)
+        print("attributes:", attributes)
         for attribute in attributes:
-            # print(attribute)
+            print("attribute:", attribute)
             is_real_type = dataset.is_real_type_field(attribute)
             attrValues = dataset.get_distinct_valueset(attribute)
-            # print(attrValues)
+            print(attrValues)
             if is_real_type and split_points > 0 and len(attrValues) > split_points:
                 attrValues = sample(attrValues, split_points)
             for attrValue in attrValues:
@@ -140,22 +140,29 @@ def construct_decision_tree(dataset, remainedSet, targets, depth, lf, leaf_nodes
                         leftIdSet.append(Id)
                     else:
                         rightIdSet.append(Id)
+                # print("leftIdSet:", leftIdSet)
+                # print("rightIdSet:", rightIdSet)
+
                 leftTargets = [targets[id] for id in leftIdSet]
                 rightTargets = [targets[id] for id in rightIdSet]
+                # print("leftTargets:", leftTargets)
+                # print("rightTargets:", rightTargets)
                 sum_mse = MSE(leftTargets)+MSE(rightTargets)
+                print("sum_mse:", sum_mse)
+
                 if mse < 0 or sum_mse < mse:
                     selectedAttribute = attribute
                     conditionValue = attrValue
                     mse = sum_mse
                     selectedLeftIdSet = leftIdSet
                     selectedRightIdSet = rightIdSet
-        # print(selectedAttribute)
-        # print(mse)
+        print("selectedAttribute:", selectedAttribute)
+        print("mse:", mse)
         # if not selectedAttribute or mse < 0:
         #     raise ValueError("cannot determine the split attribute.")
         tree = Tree()
         tree.split_feature = selectedAttribute
-        # print(tree.split_feature)
+        print("tree.split_feature:", tree.split_feature)
         tree.real_value_feature = dataset.is_real_type_field(selectedAttribute)
         tree.conditionValue = conditionValue
         tree.leftTree, lf = construct_decision_tree(dataset, selectedLeftIdSet, targets, depth+1, lf, leaf_nodes, max_depth, loss)

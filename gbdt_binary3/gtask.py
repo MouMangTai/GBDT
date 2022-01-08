@@ -58,13 +58,16 @@ class Task:
 
         residual = {}
 
+
+        # --新增--
         G, H = self.loss.computeGH(nodes, train_node, f, None, subset, dataset, self.learn_rate)
         for temp in G:
             if H[temp] == 0.0:
                 continue
-            residual[temp] = (-G[temp])/H[temp]
+            residual[temp] = G[temp]/H[temp]
 
         print("residual:", residual)
+        # ------
 
 
         leaf_nodes = []
@@ -102,16 +105,18 @@ class Task:
         # print(f)
         # residual = self.loss.compute_residual(dataset, subset, f)  ####
         residual = {}
-        # 新增
 
+
+        # --新增--
         G, H = self.loss.computeGH(nodes, train_node, f, Pre_treelfs, subset, dataset, self.learn_rate)
 
         for temp in G:
             if H[temp] == 0.0:
                 continue
-            residual[temp] = (-G[temp])/H[temp]
+            residual[temp] = G[temp]/H[temp]
 
         print("residual:", residual)
+        # ------
 
         leaf_nodes = []
         targets = residual
